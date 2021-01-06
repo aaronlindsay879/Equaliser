@@ -338,3 +338,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/CodeGraphData/Result_solution/xml
+/CodeGraphData

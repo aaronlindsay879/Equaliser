@@ -26,8 +26,7 @@ namespace Backend.Algorithms.Tests
                         }*/
 
 
-            byte[] data = FileHandling.Wav.ReadWav("../../../Files/440.wav");
-            FileHandling.Wav.ParseWav(data);
+            Song song = FileHandling.Wav.ReadWav("../../../Files/1.wav");
         }
     }
 }

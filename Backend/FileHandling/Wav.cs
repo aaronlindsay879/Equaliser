@@ -87,7 +87,7 @@ namespace Backend.FileHandling
         /// </summary>
         /// <param name="data">Audio data to construct headers for</param>
         /// <returns>A byte array of headers</returns>
-        public static byte[] GenerateHeaders(AudioData data)
+        private static byte[] GenerateHeaders(AudioData data)
         {
             byte[] headers = new byte[AUDIO_LOCATION + 1];
 
@@ -138,7 +138,7 @@ namespace Backend.FileHandling
         /// </summary>
         /// <param name="song">Song to generate bytes for</param>
         /// <returns>Byte array of audio</returns>
-        public static byte[] GenerateAudioBytes(Song song)
+        private static byte[] GenerateAudioBytes(Song song)
         {
             //generate a byte array with sufficient size for all data (num samples * bytes per sample)
             byte[] output = new byte[song.Data.NumSamples * song.Data.BytesPerSample];
@@ -166,12 +166,12 @@ namespace Backend.FileHandling
         /// </summary>
         /// <param name="filePath">Location to save song to</param>
         /// <param name="song">Song to save</param>
-        public static void Save(string filePath, Song song)
+        public static bool Save(string filePath, Song song)
         {
             byte[] headers = GenerateHeaders(song.Data);
             byte[] audio = GenerateAudioBytes(song);
 
-            File.WriteAllBytes(filePath, headers.Concat(audio).ToArray());
+            return WriteRaw(filePath, headers.Concat(audio).ToArray());
         }
     }
 }

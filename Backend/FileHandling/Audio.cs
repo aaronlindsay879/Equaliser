@@ -22,6 +22,25 @@ namespace Backend.FileHandling
         }
 
         /// <summary>
+        /// Tries to write an array of bytes to a given file path
+        /// </summary>
+        /// <param name="filePath">File path to write to</param>
+        /// <param name="bytes">Bytes to write</param>
+        /// <returns>Bool indicating success</returns>
+        protected static bool WriteRaw(string filePath, byte[] bytes)
+        {
+            try
+            {
+                File.WriteAllBytes(filePath, bytes);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Reads and parses bytes from a byte array, ensuring it's parsed correctly
         /// </summary>
         /// <param name="data">Byte array to read from</param>

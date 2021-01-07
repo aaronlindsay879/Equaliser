@@ -8,6 +8,6 @@ namespace Backend.FileHandling
     interface IAudio
     {
         public static Song Read(string filePath) => throw new NotImplementedException();
-        public static void Save(string filePath, Song song) => throw new NotImplementedException();
+        public static bool Save(string filePath, Song song) => throw new NotImplementedException();
     }
 }

@@ -7,6 +7,9 @@ namespace Backend.Data
     public class Song
     {
         public double[] Sound;
+        public AudioData Data;
+
+        //kept in temp
         public int SamplingRate;
     }
 }

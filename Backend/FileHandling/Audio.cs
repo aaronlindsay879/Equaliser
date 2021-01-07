@@ -66,21 +66,25 @@ namespace Backend.FileHandling
         /// </summary>
         /// <param name="data">Data to write</param>
         /// <param name="count">Number of bytes</param>
-        /// <param name="littleEndian"></param>
-        /// <param name="twosComplement"></param>
-        /// <returns></returns>
+        /// <param name="littleEndian">Whether to use little or big endian</param>
+        /// <param name="twosComplement">Whether to write with two's complement</param>
+        /// <returns>A byte array containing the value <paramref name="data"/></returns>
         public static byte[] WriteBytes(long data, int count, bool littleEndian = true, bool twosComplement = false)
         {
             byte[] output = new byte[count];
 
             for (int i = 0; i < count; i++)
             {
+                //calculate how far to bitshift the data. this decides which bits get masked via the bitmask
+                //if using big endian, have to mask values in reverse
                 int shift;
                 if (littleEndian)
                     shift = i * 8;
                 else
                     shift = (count - 1) * 8 - i * 8;
 
+                //shift the value to the correct position and mask by 0xff (0b11111111) to isolate last 8 bits
+                //then put the byte in the array
                 output[i] = (byte)(data >> shift & 0xff);
             }
 

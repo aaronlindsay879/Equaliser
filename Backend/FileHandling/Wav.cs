@@ -91,7 +91,8 @@ namespace Backend.FileHandling
         {
             byte[] headers = new byte[AUDIO_LOCATION + 1];
 
-            /* RIFF header
+            /* 
+             * RIFF header
              * 0-3 "RIFF"
              * 4-7 size of everything after here (36 + Subchunk2Size)
              * 8-11 "WAVE"
@@ -100,7 +101,8 @@ namespace Backend.FileHandling
             headers.SpliceNum(36 + data.Subchunk2Size, 4, 4);
             headers.SpliceString("WAVE", 8);
 
-            /*FMT sub-chunk
+            /* 
+             * FMT sub-chunk
              * 12-15 "fmt "
              * 16-19 should always be the number 16
              * 20-21 should always be the number 1
@@ -119,7 +121,8 @@ namespace Backend.FileHandling
             headers.SpliceNum(data.NumChannels * data.BytesPerSample, 32, 2);
             headers.SpliceNum(data.BitsPerSample, 34, 2);
 
-            /* DATA sub-chunk
+            /*
+             * DATA sub-chunk
              * 36-39 "data"
              * 40-43 Subchunk2Size (num samples * num channels * bytes per sample)
              * 44+   audio data

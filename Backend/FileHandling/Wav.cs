@@ -9,17 +9,10 @@ namespace Backend.FileHandling
 {
     public class Wav : Audio, IAudio
     {
-        private const int CHANNELS_LOCATION = 21;
-        private const int CHANNELS_BITS = 2;
-
-        private const int SAMPLERATE_LOCATION = 23;
-        private const int SAMPLERATE_BITS = 4;
-
-        private const int INCREMENT_LOCATION = 33;
-        private const int INCREMENT_BITS = 2;
-
-        private const int SIZE_LOCATION = 39;
-        private const int SIZE_BITS = 4;
+        private static readonly BitInfo CHANNEL = (21, 2);
+        private static readonly BitInfo SAMPLERATE = (23, 4);
+        private static readonly BitInfo INCREMENT = (33, 2);
+        private static readonly BitInfo SIZE = (39, 4);
 
         private const int AUDIO_LOCATION = 43;
 
@@ -33,13 +26,13 @@ namespace Backend.FileHandling
             //fetch simple data from headers
             var audioData = new AudioData
             {
-                NumChannels = (short)ReadBytes(data, CHANNELS_LOCATION, CHANNELS_BITS),
-                SampleRate = (int)ReadBytes(data, SAMPLERATE_LOCATION, SAMPLERATE_BITS),
-                BitsPerSample = (short)ReadBytes(data, INCREMENT_LOCATION, INCREMENT_BITS)
+                NumChannels = (short)ReadBytes(data, CHANNEL.Location, CHANNEL.Bits),
+                SampleRate = (int)ReadBytes(data, SAMPLERATE.Location, SAMPLERATE.Bits),
+                BitsPerSample = (short)ReadBytes(data, INCREMENT.Location, INCREMENT.Bits)
             };
 
             //calculate number of samples from data in headers and previous data found
-            audioData.NumSamples = (int)ReadBytes(data, SIZE_LOCATION, SIZE_BITS);
+            audioData.NumSamples = (int)ReadBytes(data, SIZE.Location, SIZE.Bits);
             audioData.NumSamples /= audioData.NumChannels * audioData.BitsPerSample / 8;
 
             return audioData;

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Backend.FileHandling
 {
-    public static class Wav
+    public class Wav : Audio, IAudio
     {
         private const int SAMPLERATE_LOCATION = 23;
         private const int SAMPLERATE_BITS = 4;
@@ -19,46 +19,6 @@ namespace Backend.FileHandling
         private const int SIZE_BITS = 4;
 
         private const int AUDIO_LOCATION = 43;
-
-        /// <summary>
-        /// Reads and parses bytes from a byte array, ensuring it's parsed correctly
-        /// </summary>
-        /// <param name="data">Byte array to read from</param>
-        /// <param name="start">Index of first byte</param>
-        /// <param name="count">Number of bytes to read</param>
-        /// <param name="littleEndian">Whether the data is little endian</param>
-        /// <param name="twosComplement">Whether to parse it as a two's complement number</param>
-        /// <returns>A parsed long</returns>
-        private static long ReadBytes(this byte[] data, int start, int count, bool littleEndian = true, bool twosComplement = false)
-        {
-            long output = 0;
-
-            //for every byte to read
-            for (int i = 0; i < count; i++)
-            {
-                //shift the current stored output along by 8 bits to "make room" for next byte
-                output <<= 8;
-
-                //if little endian, then have to read bytes backwards
-                //otherwise just read next byte and add to output
-                if (littleEndian)
-                    output += data[start + count - i];
-                else
-                    output += data[start + i];
-            }
-
-            //if number is stored with two's complement
-            if (twosComplement)
-            {
-                //find the most significant bit by shifting all the others out of the way
-                int msb = (int)(output >> (count * 8 - 1));
-
-                //if msb is 1, flip the output's msb to convert to a two's complement number
-                output -= msb * (1 << (count * 8));
-            }
-
-            return output;
-        }
 
         /// <summary>
         /// Reads the raw bytes from a wav file, and performs needed checks
@@ -91,9 +51,9 @@ namespace Backend.FileHandling
             Console.WriteLine($"audio size: {data.ReadBytes(39, 4)}");*/
 
             //fetches data from headers needed for parsing
-            int samplingRate = (int)data.ReadBytes(SAMPLERATE_LOCATION, SAMPLERATE_BITS); //sampling rate in Hz
-            int audioSize = (int)data.ReadBytes(SIZE_LOCATION, SIZE_BITS) / 2; //how many audio samples in the file
-            int increment = (int)data.ReadBytes(INCREMENT_LOCATION, INCREMENT_BITS) / 8; //how many bytes between starts of samples
+            int samplingRate = (int)ReadBytes(data, SAMPLERATE_LOCATION, SAMPLERATE_BITS); //sampling rate in Hz
+            int audioSize = (int)ReadBytes(data, SIZE_LOCATION, SIZE_BITS) / 2; //how many audio samples in the file
+            int increment = (int)ReadBytes(data, INCREMENT_LOCATION, INCREMENT_BITS) / 8; //how many bytes between starts of samples
 
             double[] output = new double[audioSize];
             //iterate through all of the audio samples
@@ -105,7 +65,7 @@ namespace Backend.FileHandling
                 double maxValue = Math.Pow(2, increment * 8 - 1);
 
                 //read the raw bytes and divide by the max value to constrain
-                output[i] = data.ReadBytes(byteLocation, increment, twosComplement: true) / maxValue;
+                output[i] = ReadBytes(data, byteLocation, increment, twosComplement: true) / maxValue;
             }
 
             return new Song
@@ -120,6 +80,6 @@ namespace Backend.FileHandling
         /// </summary>
         /// <param name="filePath">Path to file</param>
         /// <returns>A song containing time-amplitude data</returns>
-        public static Song ReadWav(string filePath) => ParseWav(ReadRarWav(filePath));
+        public static Song Read(string filePath) => ParseWav(ReadRarWav(filePath));
     }
 }

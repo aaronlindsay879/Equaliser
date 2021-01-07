@@ -1,11 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace Backend.FileHandling
 {
     public class Audio
     {
+        /// <summary>
+        /// Reads the raw bytes from an audio file, and performs needed checks
+        /// </summary>
+        /// <param name="filePath">Path to the file</param>
+        /// <returns>Byte array of raw data</returns>
+        /// <exception cref="ArgumentException">Thrown if file does not exist</exception>
+        protected static byte[] ReadRaw(string filePath)
+        {
+            if (!File.Exists(filePath))
+                throw new ArgumentException($"File does not exist or is inaccessible at {filePath}");
+
+            return File.ReadAllBytes(filePath);
+        }
+
         /// <summary>
         /// Reads and parses bytes from a byte array, ensuring it's parsed correctly
         /// </summary>
@@ -44,6 +59,32 @@ namespace Backend.FileHandling
             }
 
             return output;
+        }
+
+        /// <summary>
+        /// Writes given data to an array of bytes
+        /// </summary>
+        /// <param name="data">Data to write</param>
+        /// <param name="count">Number of bytes</param>
+        /// <param name="littleEndian"></param>
+        /// <param name="twosComplement"></param>
+        /// <returns></returns>
+        public static byte[] WriteBytes(long data, int count, bool littleEndian = true, bool twosComplement = false)
+        {
+            byte[] output = new byte[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                int shift;
+                if (littleEndian)
+                    shift = i * 8;
+                else
+                    shift = (count - 1) * 8 - i * 8;
+
+                output[i] = (byte)(data >> shift & 0xff);
+            }
+
+           return output;
         }
     }
 }

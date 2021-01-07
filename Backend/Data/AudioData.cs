@@ -12,5 +12,7 @@ namespace Backend.Data
         public int NumSamples;
 
         public short BytesPerSample => (short)(BitsPerSample / 8);
+        public int Subchunk2Size => NumSamples * NumChannels * BytesPerSample;
+        public int ByteRate => SampleRate * NumChannels * BytesPerSample;
     }
 }

@@ -24,20 +24,6 @@ namespace Backend.FileHandling
         private const int AUDIO_LOCATION = 43;
 
         /// <summary>
-        /// Reads the raw bytes from a wav file, and performs needed checks
-        /// </summary>
-        /// <param name="filePath">Path to the file</param>
-        /// <returns>Byte array of raw data</returns>
-        /// <exception cref="ArgumentException">Thrown if file does not exist</exception>
-        private static byte[] ReadRarWav(string filePath)
-        {
-            if (!File.Exists(filePath))
-                throw new ArgumentException($"File does not exist or is inaccessible at {filePath}");
-
-            return File.ReadAllBytes(filePath);
-        }
-
-        /// <summary>
         /// Parses the headers of a wav file to extract useful information
         /// </summary>
         /// <param name="data">Header data</param>
@@ -67,6 +53,7 @@ namespace Backend.FileHandling
         private static Song ParseWav(byte[] data)
         {
             AudioData audioData = ParseHeaders(data.Take(AUDIO_LOCATION + 1).ToArray());
+            GenerateHeaders(audioData);
 
             double[] output = new double[audioData.NumSamples];
             //iterate through all of the audio samples
@@ -93,6 +80,58 @@ namespace Backend.FileHandling
         /// </summary>
         /// <param name="filePath">Path to file</param>
         /// <returns>A song containing time-amplitude data</returns>
-        public static Song Read(string filePath) => ParseWav(ReadRarWav(filePath));
+        public static Song Read(string filePath) => ParseWav(ReadRaw(filePath));
+
+        /// <summary>
+        /// A method to generate the headers for a given set of audio data
+        /// </summary>
+        /// <param name="data">Audio data to construct headers for</param>
+        /// <returns>A byte array of headers</returns>
+        public static byte[] GenerateHeaders(AudioData data)
+        {
+            byte[] headers = new byte[AUDIO_LOCATION + 1];
+
+            /* RIFF header
+             * 0-3 "RIFF"
+             * 4-7 size of everything after here (36 + Subchunk2Size)
+             * 8-11 "WAVE"
+             */
+            headers.SpliceString("RIFF", 0);
+            headers.SpliceNum(36 + data.Subchunk2Size, 4, 4);
+            headers.SpliceString("WAVE", 8);
+
+            /*FMT sub-chunk
+             * 12-15 "fmt "
+             * 16-19 should always be the number 16
+             * 20-21 should always be the number 1
+             * 22-23 number of channels
+             * 24-27 sample rate
+             * 28-31 byte rate (sample rate * num channels * bytes per sample)
+             * 32-33 block align (num channels * bytes per sample)
+             * 34-35 bits per sample
+             */
+            headers.SpliceString("fmt ", 12);
+            headers.SpliceNum(16, 16, 4);
+            headers.SpliceNum(1, 20, 2);
+            headers.SpliceNum(data.NumChannels, 22, 2);
+            headers.SpliceNum(data.SampleRate, 24, 4);
+            headers.SpliceNum(data.ByteRate, 28, 4);
+            headers.SpliceNum(data.NumChannels * data.BytesPerSample, 32, 2);
+            headers.SpliceNum(data.BitsPerSample, 34, 2);
+
+            /* DATA sub-chunk
+             * 36-39 "data"
+             * 40-43 Subchunk2Size (num samples * num channels * bytes per sample)
+             * 44+   audio data
+             */
+            headers.SpliceString("data", 36);
+            headers.SpliceNum(data.Subchunk2Size, 40, 4);
+
+            //debug hexdump code
+            string output = "";
+            foreach (var (val, i) in headers.Select((x, i) => (x.ToString("X2"), i))) output += i % 16 == 0 ? $"\n{val}" : (i % 8 == 0 ? @$"    {val}" : @$"  {val}");
+
+            return headers;
+        }
     }
 }

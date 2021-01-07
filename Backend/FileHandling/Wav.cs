@@ -9,10 +9,16 @@ namespace Backend.FileHandling
 {
     public static class Wav
     {
-        const int SAMPLERATE_LOCATION = 23;
-        const int INCREMENT_LOCATION = 33;
-        const int SIZE_LOCATION = 39;
-        const int AUDIO_LOCATION = 43;
+        private const int SAMPLERATE_LOCATION = 23;
+        private const int SAMPLERATE_BITS = 4;
+
+        private const int INCREMENT_LOCATION = 33;
+        private const int INCREMENT_BITS = 2;
+
+        private const int SIZE_LOCATION = 39;
+        private const int SIZE_BITS = 4;
+
+        private const int AUDIO_LOCATION = 43;
 
         /// <summary>
         /// Reads and parses bytes from a byte array, ensuring it's parsed correctly
@@ -25,7 +31,7 @@ namespace Backend.FileHandling
         /// <returns>A parsed long</returns>
         private static long ReadBytes(this byte[] data, int start, int count, bool littleEndian = true, bool twosComplement = false)
         {
-            int output = 0;
+            long output = 0;
 
             //for every byte to read
             for (int i = 0; i < count; i++)
@@ -45,7 +51,7 @@ namespace Backend.FileHandling
             if (twosComplement)
             {
                 //find the most significant bit by shifting all the others out of the way
-                int msb = output >> (count * 8 - 1);
+                int msb = (int)(output >> (count * 8 - 1));
 
                 //if msb is 1, flip the output's msb to convert to a two's complement number
                 output -= msb * (int)Math.Pow(2, count * 8);
@@ -63,7 +69,7 @@ namespace Backend.FileHandling
         private static byte[] ReadRarWav(string filePath)
         {
             if (!File.Exists(filePath))
-                throw new ArgumentException($"File does not exist at {filePath}");
+                throw new ArgumentException($"File does not exist or is inaccessible at {filePath}");
 
             return File.ReadAllBytes(filePath);
         }
@@ -85,9 +91,9 @@ namespace Backend.FileHandling
             Console.WriteLine($"audio size: {data.ReadBytes(39, 4)}");*/
 
             //fetches data from headers needed for parsing
-            int samplingRate = (int)data.ReadBytes(SAMPLERATE_LOCATION, 4); //sampling rate in Hz
-            int audioSize = (int)data.ReadBytes(SIZE_LOCATION, 4) / 2; //how many audio samples in the file
-            int increment = (int)data.ReadBytes(INCREMENT_LOCATION, 2) / 8; //how many bytes between starts of samples
+            int samplingRate = (int)data.ReadBytes(SAMPLERATE_LOCATION, SAMPLERATE_BITS); //sampling rate in Hz
+            int audioSize = (int)data.ReadBytes(SIZE_LOCATION, SIZE_BITS) / 2; //how many audio samples in the file
+            int increment = (int)data.ReadBytes(INCREMENT_LOCATION, INCREMENT_BITS) / 8; //how many bytes between starts of samples
 
             double[] output = new double[audioSize];
             //iterate through all of the audio samples

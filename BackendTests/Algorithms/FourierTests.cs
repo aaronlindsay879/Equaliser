@@ -14,19 +14,14 @@ namespace Backend.Algorithms.Tests
         [TestMethod()]
         public void DFTTest()
         {
-            /*            Song song = new Song()
-                        {
-                            SamplingRate = 10,
-                            Sound = Enumerable.Range(0, 100).Select(x => Math.Sin(x * Math.PI / 25)).ToArray()
-                        };
+            Song oneHertz = FileHandling.Wav.Read(@"../../../Files/1.wav");
+            DecomposedSongSegment dss = oneHertz.DFT();
 
-                        foreach (var (x, i) in song.DFT().Audio.Select((x, i) => (x, i)))
-                        {
-                            Console.WriteLine($"Freq: {i}, Amp: {x}");
-                        }*/
-
-
-            Song song = FileHandling.Wav.ReadWav("../../../Files/1.wav");
+            int i = 0;
+            foreach (var x in dss.Audio)
+            {
+                Console.WriteLine($"{i++}: {x}");
+            }
         }
     }
 }

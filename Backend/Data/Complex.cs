@@ -28,7 +28,7 @@ namespace Backend.Data
         public Complex(double angle)
         {
             Real = Math.Cos(angle);
-            Imaginary = -Math.Sin(angle);
+            Imaginary = Math.Sin(angle);
         }
 
         /// <summary>

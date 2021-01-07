@@ -29,11 +29,10 @@ namespace Backend.FileHandling
         /// <param name="start">Where to place first byte of number</param>
         /// <param name="count">How many bytes to write the number into</param>
         /// <param name="littleEndian">Whether to use little endian</param>
-        /// <param name="twosComplement">Whether to use two's complement</param>
-        public static void SpliceNum(this byte[] arr, long num, int start, int count, bool littleEndian = true, bool twosComplement = false)
+        public static void SpliceNum(this byte[] arr, long num, int start, int count, bool littleEndian = true)
         {
             //convert the number to a byte array using given arguments
-            byte[] byteNum = Audio.WriteBytes(num, count, littleEndian, twosComplement);
+            byte[] byteNum = Audio.WriteBytes(num, count, littleEndian);
 
             //copies the number into byte array at given positions
             Array.Copy(byteNum, 0, arr, start, count);

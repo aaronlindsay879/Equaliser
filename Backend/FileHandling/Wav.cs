@@ -130,11 +130,48 @@ namespace Backend.FileHandling
             headers.SpliceString("data", 36);
             headers.SpliceNum(data.Subchunk2Size, 40, 4);
 
-            //debug hexdump code
-            string output = "";
-            foreach (var (val, i) in headers.Select((x, i) => (x.ToString("X2"), i))) output += i % 16 == 0 ? $"\n{val}" : (i % 8 == 0 ? @$"    {val}" : @$"  {val}");
-
             return headers;
+        }
+
+        /// <summary>
+        /// Generates the bytes for the actual audio of the song
+        /// </summary>
+        /// <param name="song">Song to generate bytes for</param>
+        /// <returns>Byte array of audio</returns>
+        public static byte[] GenerateAudioBytes(Song song)
+        {
+            //generate a byte array with sufficient size for all data (num samples * bytes per sample)
+            byte[] output = new byte[song.Data.NumSamples * song.Data.BytesPerSample];
+
+            //for each (sample, index) in the sound - standard index (0, 1, 2, etc.)
+            foreach (var (sample, index) in song.Sound.Select((x, i) => (x, i)))
+            {
+                //multiply the double by 2^(bits per sample - 1) to move back to storage types
+                long num = (long)(sample * Math.Pow(2, song.Data.BitsPerSample - 1));
+
+                //if num is less than 0, add value of msb to make it positive again
+                //essentially reverse two's complement
+                if (num < 0)
+                    num += (long)Math.Pow(2, song.Data.BitsPerSample);
+
+                //splice the calculate number into the byte array
+                output.SpliceNum(num, index * song.Data.BytesPerSample, song.Data.BytesPerSample);
+            }
+
+            return output;
+        }
+
+        /// <summary>
+        /// Saves a given song to a given location
+        /// </summary>
+        /// <param name="filePath">Location to save song to</param>
+        /// <param name="song">Song to save</param>
+        public static void Save(string filePath, Song song)
+        {
+            byte[] headers = GenerateHeaders(song.Data);
+            byte[] audio = GenerateAudioBytes(song);
+
+            File.WriteAllBytes(filePath, headers.Concat(audio).ToArray());
         }
     }
 }

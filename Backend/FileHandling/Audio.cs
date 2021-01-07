@@ -67,9 +67,8 @@ namespace Backend.FileHandling
         /// <param name="data">Data to write</param>
         /// <param name="count">Number of bytes</param>
         /// <param name="littleEndian">Whether to use little or big endian</param>
-        /// <param name="twosComplement">Whether to write with two's complement</param>
         /// <returns>A byte array containing the value <paramref name="data"/></returns>
-        public static byte[] WriteBytes(long data, int count, bool littleEndian = true, bool twosComplement = false)
+        public static byte[] WriteBytes(long data, int count, bool littleEndian = true)
         {
             byte[] output = new byte[count];
 

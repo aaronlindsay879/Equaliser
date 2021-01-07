@@ -54,7 +54,7 @@ namespace Backend.FileHandling
                 int msb = (int)(output >> (count * 8 - 1));
 
                 //if msb is 1, flip the output's msb to convert to a two's complement number
-                output -= msb * (int)Math.Pow(2, count * 8);
+                output -= msb * (1 << (count * 8));
             }
 
             return output;

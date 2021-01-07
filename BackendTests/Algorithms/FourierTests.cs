@@ -14,14 +14,7 @@ namespace Backend.Algorithms.Tests
         [TestMethod()]
         public void DFTTest()
         {
-            Song oneHertz = FileHandling.Wav.Read(@"../../../Files/1.wav");
-            DecomposedSongSegment dss = oneHertz.DFT();
-
-            int i = 0;
-            foreach (var x in dss.Audio)
-            {
-                Console.WriteLine($"{i++}: {x}");
-            }
+            Assert.Fail();
         }
     }
 }

@@ -159,21 +159,16 @@ namespace Backend.FileHandling
         /// <param name="song">Song to save</param>
         public static bool Save(string filePath, Song song)
         {
+            //make a byte array of sufficient length
             byte[] data = new byte[song.Data.NumSamples * song.Data.BytesPerSample + AUDIO_LOCATION + 1];
+
+            //write headers to first 44 bytes
             Array.Copy(GenerateHeaders(song.Data), 0, data, 0, AUDIO_LOCATION + 1);
+            //fill remaining data with audio bytes
             Array.Copy(GenerateAudioBytes(song), 0, data, AUDIO_LOCATION + 1, song.Data.NumSamples * song.Data.BytesPerSample);
+
+            //write data
             return WriteRaw(filePath, data);
-
-/*            byte[] headers = GenerateHeaders(song.Data);
-            byte[] audio = GenerateAudioBytes(song);
-
-            return WriteRaw(filePath, headers.Concat(audio).ToArray());*/
-
-
-/*            byte[] data = GenerateHeaders(song.Data);
-            data = data.Concat(GenerateAudioBytes(song)).ToArray();
-
-            return WriteRaw(filePath, data);*/
         }
     }
 }

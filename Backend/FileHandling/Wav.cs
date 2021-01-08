@@ -138,12 +138,12 @@ namespace Backend.FileHandling
             foreach (var (sample, index) in song.Sound.Select((x, i) => (x, i)))
             {
                 //multiply the double by 2^(bits per sample - 1) to move back to storage types
-                long num = (long)(sample * Math.Pow(2, song.Data.BitsPerSample - 1));
+                long num = (long)(sample * (1 << (song.Data.BitsPerSample - 1)));
 
                 //if num is less than 0, add value of msb to make it positive again
                 //essentially reverse two's complement
                 if (num < 0)
-                    num += (long)Math.Pow(2, song.Data.BitsPerSample);
+                    num += 1 << song.Data.BitsPerSample;
 
                 //splice the calculate number into the byte array
                 output.SpliceNum(num, index * song.Data.BytesPerSample, song.Data.BytesPerSample);

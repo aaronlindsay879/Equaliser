@@ -7,7 +7,14 @@ namespace Backend.Data
     /// </summary>
     public class Complex
     {
+        /// <summary>
+        /// The real component of the complex number
+        /// </summary>
         public double Real;
+
+        /// <summary>
+        /// The imaginary component of the complex number
+        /// </summary>
         public double Imaginary;
 
         /// <summary>

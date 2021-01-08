@@ -89,7 +89,7 @@ namespace Backend.FileHandling
         /// <param name="twosComplement">Whether to parse it as a two's complement number</param>
         /// <returns>A parsed long</returns>
         protected static long ReadBytes(byte[] data, BitInfo info, bool littleEndian = true, bool twosComplement = false) =>
-            ReadBytes(data, info.Location - 1, info.Bits, littleEndian, twosComplement);
+            ReadBytes(data, info.Location - 1, info.Bytes, littleEndian, twosComplement);
 
         /// <summary>
         /// Writes given data to an array of bytes

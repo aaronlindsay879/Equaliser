@@ -5,8 +5,15 @@
     /// </summary>
     public struct BitInfo
     {
+        /// <summary>
+        /// Location of the first bit of information
+        /// </summary>
         public int Location;
-        public int Bits;
+
+        /// <summary>
+        /// How many bytes the information consists of
+        /// </summary>
+        public int Bytes;
 
         /// <summary>
         /// Constructs a BitInfo from a tuple assignment
@@ -15,7 +22,7 @@
         public static implicit operator BitInfo((int, int) tuple) => new BitInfo
         {
             Location = tuple.Item1,
-            Bits = tuple.Item2
+            Bytes = tuple.Item2
         };
     }
 }

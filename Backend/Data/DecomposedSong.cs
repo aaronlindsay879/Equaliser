@@ -8,7 +8,14 @@ namespace Backend.Data
     /// </summary>
     public class DecomposedSongSegment
     {
+        /// <summary>
+        /// The decomposed audio, where index is frequency and value is amplitude
+        /// </summary>
         public double[] Audio;
+
+        /// <summary>
+        /// Sampling rate of the audio
+        /// </summary>
         public int SamplingRate;
 
         /// <summary>
@@ -26,7 +33,14 @@ namespace Backend.Data
     /// </summary>
     public class DecomposedSong
     {
+        /// <summary>
+        /// A dictionary of starting time of segment to decomposed song segments
+        /// </summary>
         public Dictionary<double, DecomposedSongSegment> Audio;
+
+        /// <summary>
+        /// Sampling rate of the audio
+        /// </summary>
         public int SamplingRate;
     }
 }

@@ -19,9 +19,12 @@ namespace Backend.FileHandling.Tests
         }
 
         [TestMethod()]
-        public void SaveIntegrationTest()
+        [DataRow(@"../../../Files/1.wav")]
+        [DataRow(@"../../../Files/440.wav")]
+        [DataRow(@"../../../Files/1 2 3.wav")]
+        public void SaveIntegrationTest(string filePath)
         {
-            Song origSong = Wav.Read(@"../../../Files/1.wav");
+            Song origSong = Wav.Read(filePath);
             Wav.Save("temp.wav", origSong);
 
             Song newSong = Wav.Read("temp.wav");

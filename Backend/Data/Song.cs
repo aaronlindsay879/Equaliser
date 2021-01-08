@@ -17,7 +17,7 @@ namespace Backend.Data
         public bool Equals(Song other)
         {
             return Enumerable.SequenceEqual(Sound, other.Sound)
-                && Data.Equals(other.Data);
+                && Data == other.Data;
         }
     }
 }

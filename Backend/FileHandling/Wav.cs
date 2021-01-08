@@ -9,10 +9,10 @@ namespace Backend.FileHandling
 {
     public class Wav : Audio, IAudio
     {
-        private static readonly BitInfo CHANNEL = (21, 2);
-        private static readonly BitInfo SAMPLERATE = (23, 4);
-        private static readonly BitInfo INCREMENT = (33, 2);
-        private static readonly BitInfo SIZE = (39, 4);
+        private static readonly BitInfo CHANNEL = (22, 2);
+        private static readonly BitInfo SAMPLERATE = (24, 4);
+        private static readonly BitInfo INCREMENT = (34, 2);
+        private static readonly BitInfo SIZE = (40, 4);
 
         private const int AUDIO_LOCATION = 43;
 
@@ -26,13 +26,13 @@ namespace Backend.FileHandling
             //fetch simple data from headers
             var audioData = new AudioData
             {
-                NumChannels = (short)ReadBytes(data, CHANNEL.Location, CHANNEL.Bits),
-                SampleRate = (int)ReadBytes(data, SAMPLERATE.Location, SAMPLERATE.Bits),
-                BitsPerSample = (short)ReadBytes(data, INCREMENT.Location, INCREMENT.Bits)
+                NumChannels = (short)ReadBytes(data, CHANNEL),
+                SampleRate = (int)ReadBytes(data, SAMPLERATE),
+                BitsPerSample = (short)ReadBytes(data, INCREMENT)
             };
 
             //calculate number of samples from data in headers and previous data found
-            audioData.NumSamples = (int)ReadBytes(data, SIZE.Location, SIZE.Bits);
+            audioData.NumSamples = (int)ReadBytes(data, SIZE);
             audioData.NumSamples /= audioData.NumChannels * audioData.BitsPerSample / 8;
 
             return audioData;
@@ -48,14 +48,15 @@ namespace Backend.FileHandling
             AudioData audioData = ParseHeaders(data.Take(AUDIO_LOCATION + 1).ToArray());
             GenerateHeaders(audioData);
 
+            //finds the max value of a sample to correctly map numbers to [-1, 1]
+            double maxValue = Math.Pow(2, audioData.BitsPerSample - 1);
+
             double[] output = new double[audioData.NumSamples];
             //iterate through all of the audio samples
             for (int i = 0; i < audioData.NumSamples; i++)
             {
                 //finds the location of sample in raw data by multiplying by bytes per sample and shifting along by where audio starts
                 int byteLocation = i * audioData.BytesPerSample + AUDIO_LOCATION;
-                //finds the max value of a sample to correctly map numbers to [-1, 1]
-                double maxValue = Math.Pow(2, audioData.BitsPerSample - 1);
 
                 //read the raw bytes and divide by the max value to constrain
                 output[i] = ReadBytes(data, byteLocation, audioData.BytesPerSample, twosComplement: true) / maxValue;

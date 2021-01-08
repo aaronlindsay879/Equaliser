@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Backend.Data;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -79,6 +80,17 @@ namespace Backend.FileHandling
 
             return output;
         }
+
+        /// <summary>
+        /// Reads and parses bytes from a byte array, ensuring it's parsed correctly
+        /// </summary>
+        /// <param name="data">Byte array to read from</param>
+        /// <param name="info">Information on where to read</param>
+        /// <param name="littleEndian">Whether the data is little endian</param>
+        /// <param name="twosComplement">Whether to parse it as a two's complement number</param>
+        /// <returns>A parsed long</returns>
+        protected static long ReadBytes(byte[] data, BitInfo info, bool littleEndian = true, bool twosComplement = false) =>
+            ReadBytes(data, info.Location - 1, info.Bits, littleEndian, twosComplement);
 
         /// <summary>
         /// Writes given data to an array of bytes

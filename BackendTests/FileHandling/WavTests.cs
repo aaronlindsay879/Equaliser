@@ -1,9 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Backend.FileHandling;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Backend.Data;
+﻿using Backend.Data;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 
 namespace Backend.FileHandling.Tests

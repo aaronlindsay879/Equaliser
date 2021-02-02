@@ -21,9 +21,9 @@ namespace Backend.Algorithms.Tests
             foreach (var (amplitude, index) in dss.Audio.Select((x, i) => (x, i)))
             {
                 if (index > output.Length - 1)
-                    break;
-
-                Assert.AreEqual(output[index], amplitude, 5e-4);
+                    Assert.AreEqual(0, amplitude, 5e-4);
+                else
+                    Assert.AreEqual(output[index], amplitude, 5e-4);
             }
             
         }

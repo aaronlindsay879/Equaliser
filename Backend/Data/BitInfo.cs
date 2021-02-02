@@ -17,21 +17,25 @@ namespace Backend.Data
         /// </summary>
         public int Offset;
 
-        /// <summary>
-        /// Constructs a BitInfo from a tuple assignment
-        /// </summary>
-        /// <param name="tuple">Tuple wherre item1 = location, item2 = bit length</param>
-        public static implicit operator BitInfo((int, int) tuple) => new BitInfo
-        {
-            Location = tuple.Item1,
-            Offset = tuple.Item2
-        };
+        public BitInfo(int location, int offset) => (Location, Offset) = (location, offset);
     }
 
+    /// <summary>
+    /// Attribute class which contains information about the location and offset of data for a given element
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field)]
     public class EnumInfo : Attribute
     {
         public readonly BitInfo Info;
 
-        public EnumInfo(int location, int bytes) => Info = new BitInfo() { Location = location, Offset = bytes };
+        /// <summary>
+        /// Constructs a BitInfo from given parameters
+        /// </summary>
+        /// <param name="location">Start of byte data</param>
+        /// <param name="offset">How many bytes</param>
+        public EnumInfo(int location, int offset)
+        {
+            Info = new(location, offset);
+        }
     }
 }

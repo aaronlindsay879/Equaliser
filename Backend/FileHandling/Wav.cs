@@ -27,7 +27,7 @@ namespace Backend.FileHandling
 
     public class Wav : Audio, IAudio
     {
-        private static readonly int DATA_LOCATION = WavData.DATA.BitInfo().Location;
+        private static readonly int DATA_LOCATION = WavData.DATA.BitInfo().Location - 1;
 
         /// <summary>
         /// Parses the headers of a wav file to extract useful information

@@ -1,4 +1,5 @@
 ﻿using Backend.Data;
+using Backend.Extensions;
 using System;
 using System.IO;
 
@@ -83,13 +84,17 @@ namespace Backend.FileHandling
         /// <summary>
         /// Reads and parses bytes from a byte array, ensuring it's parsed correctly
         /// </summary>
+        /// <typeparam name="T">Type of enum</typeparam>
         /// <param name="data">Byte array to read from</param>
-        /// <param name="info">Information on where to read</param>
+        /// <param name="info">Enum value for data to read</param>
         /// <param name="littleEndian">Whether the data is little endian</param>
         /// <param name="twosComplement">Whether to parse it as a two's complement number</param>
         /// <returns>A parsed long</returns>
-        protected static long ReadBytes(byte[] data, BitInfo info, bool littleEndian = true, bool twosComplement = false) =>
-            ReadBytes(data, info.Location - 1, info.Bytes, littleEndian, twosComplement);
+        protected static long ReadBytes<T>(byte[] data, T info, bool littleEndian = true, bool twosComplement = false) where T : IConvertible
+        {
+            BitInfo bitInfo = info.BitInfo();
+            return ReadBytes(data, bitInfo.Location - 1, bitInfo.Offset, littleEndian, twosComplement);
+        }
 
         /// <summary>
         /// Writes given data to an array of bytes

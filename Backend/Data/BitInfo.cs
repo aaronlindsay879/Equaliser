@@ -1,4 +1,6 @@
-﻿namespace Backend.Data
+﻿using System;
+
+namespace Backend.Data
 {
     /// <summary>
     /// Struct containing information on the location and size of data within a byte array
@@ -13,7 +15,7 @@
         /// <summary>
         /// How many bytes the information consists of
         /// </summary>
-        public int Bytes;
+        public int Offset;
 
         /// <summary>
         /// Constructs a BitInfo from a tuple assignment
@@ -22,7 +24,14 @@
         public static implicit operator BitInfo((int, int) tuple) => new BitInfo
         {
             Location = tuple.Item1,
-            Bytes = tuple.Item2
+            Offset = tuple.Item2
         };
+    }
+
+    public class EnumInfo : Attribute
+    {
+        public readonly BitInfo Info;
+
+        public EnumInfo(int location, int bytes) => Info = new BitInfo() { Location = location, Offset = bytes };
     }
 }

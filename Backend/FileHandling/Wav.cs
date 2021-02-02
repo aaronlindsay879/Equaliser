@@ -1,17 +1,33 @@
 ﻿using Backend.Data;
+using Backend.Extensions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Backend.FileHandling
 {
+    enum WavData
+    {
+        [EnumInfo(0, 4)] CHUNK_ID,
+        [EnumInfo(4, 4)] CHUNK_SIZE,
+        [EnumInfo(8, 4)] FORMAT,
+        [EnumInfo(12, 4)] SUBCHUNK_1_ID,
+        [EnumInfo(16, 4)] SUBCHUNK_1_SIZE,
+        [EnumInfo(20, 4)] AUDIO_FORMAT,
+        [EnumInfo(22, 2)] NUM_CHANNELS,
+        [EnumInfo(24, 4)] SAMPLE_RATE,
+        [EnumInfo(28, 4)] BYTE_RATE,
+        [EnumInfo(32, 2)] BLOCK_ALIGN,
+        [EnumInfo(34, 2)] BITS_PER_SAMPLE,
+        [EnumInfo(36, 4)] SUBCHUNK_2_ID,
+        [EnumInfo(40, 4)] SUBCHUNK_2_SIZE,
+        [EnumInfo(44, -1)] DATA
+    }
+
     public class Wav : Audio, IAudio
     {
-        private static readonly BitInfo CHANNEL = (22, 2);
-        private static readonly BitInfo SAMPLERATE = (24, 4);
-        private static readonly BitInfo INCREMENT = (34, 2);
-        private static readonly BitInfo SIZE = (40, 4);
-
-        private const int AUDIO_LOCATION = 43;
+        private static readonly int DATA_LOCATION = WavData.DATA.BitInfo().Location;
 
         /// <summary>
         /// Parses the headers of a wav file to extract useful information
@@ -23,13 +39,13 @@ namespace Backend.FileHandling
             //fetch simple data from headers
             var audioData = new AudioData
             {
-                NumChannels = (short)ReadBytes(data, CHANNEL),
-                SampleRate = (int)ReadBytes(data, SAMPLERATE),
-                BitsPerSample = (short)ReadBytes(data, INCREMENT)
+                NumChannels = (short)ReadBytes(data, WavData.NUM_CHANNELS),
+                SampleRate = (int)ReadBytes(data, WavData.SAMPLE_RATE),
+                BitsPerSample = (short)ReadBytes(data, WavData.BITS_PER_SAMPLE)
             };
 
             //calculate number of samples from data in headers and previous data found
-            audioData.NumSamples = (int)ReadBytes(data, SIZE);
+            audioData.NumSamples = (int)ReadBytes(data, WavData.SUBCHUNK_2_SIZE);
             audioData.NumSamples /= audioData.NumChannels * audioData.BitsPerSample / 8;
 
             return audioData;
@@ -42,7 +58,7 @@ namespace Backend.FileHandling
         /// <returns>A song containing time-amplitude data</returns>
         private static Song ParseWav(byte[] data)
         {
-            AudioData audioData = ParseHeaders(data.Take(AUDIO_LOCATION + 1).ToArray());
+            AudioData audioData = ParseHeaders(data.Take(DATA_LOCATION + 1).ToArray());
             GenerateHeaders(audioData);
 
             //finds the max value of a sample to correctly map numbers to [-1, 1]
@@ -53,7 +69,7 @@ namespace Backend.FileHandling
             for (int i = 0; i < audioData.NumSamples; i++)
             {
                 //finds the location of sample in raw data by multiplying by bytes per sample and shifting along by where audio starts
-                int byteLocation = i * audioData.BytesPerSample + AUDIO_LOCATION;
+                int byteLocation = i * audioData.BytesPerSample + DATA_LOCATION;
 
                 //read the raw bytes and divide by the max value to constrain
                 output[i] = ReadBytes(data, byteLocation, audioData.BytesPerSample, twosComplement: true) / maxValue;
@@ -80,7 +96,7 @@ namespace Backend.FileHandling
         /// <returns>A byte array of headers</returns>
         private static byte[] GenerateHeaders(AudioData data)
         {
-            byte[] headers = new byte[AUDIO_LOCATION + 1];
+            byte[] headers = new byte[DATA_LOCATION + 1];
 
             /* 
              * RIFF header
@@ -88,9 +104,9 @@ namespace Backend.FileHandling
              * 4-7 size of everything after here (36 + Subchunk2Size)
              * 8-11 "WAVE"
              */
-            headers.SpliceString("RIFF", 0);
-            headers.SpliceNum(36 + data.Subchunk2Size, 4, 4);
-            headers.SpliceString("WAVE", 8);
+            headers.SpliceString("RIFF", WavData.CHUNK_ID);
+            headers.SpliceNum(36 + data.Subchunk2Size, WavData.CHUNK_SIZE);
+            headers.SpliceString("WAVE", WavData.FORMAT);
 
             /* 
              * FMT sub-chunk
@@ -103,14 +119,14 @@ namespace Backend.FileHandling
              * 32-33 block align (num channels * bytes per sample)
              * 34-35 bits per sample
              */
-            headers.SpliceString("fmt ", 12);
-            headers.SpliceNum(16, 16, 4);
-            headers.SpliceNum(1, 20, 2);
-            headers.SpliceNum(data.NumChannels, 22, 2);
-            headers.SpliceNum(data.SampleRate, 24, 4);
-            headers.SpliceNum(data.ByteRate, 28, 4);
-            headers.SpliceNum(data.NumChannels * data.BytesPerSample, 32, 2);
-            headers.SpliceNum(data.BitsPerSample, 34, 2);
+            headers.SpliceString("fmt ", WavData.SUBCHUNK_1_ID);
+            headers.SpliceNum(16, WavData.SUBCHUNK_1_SIZE);
+            headers.SpliceNum(1, WavData.AUDIO_FORMAT);
+            headers.SpliceNum(data.NumChannels, WavData.NUM_CHANNELS);
+            headers.SpliceNum(data.SampleRate, WavData.SAMPLE_RATE);
+            headers.SpliceNum(data.ByteRate, WavData.BYTE_RATE);
+            headers.SpliceNum(data.NumChannels * data.BytesPerSample, WavData.BLOCK_ALIGN);
+            headers.SpliceNum(data.BitsPerSample, WavData.BITS_PER_SAMPLE);
 
             /*
              * DATA sub-chunk
@@ -118,8 +134,8 @@ namespace Backend.FileHandling
              * 40-43 Subchunk2Size (num samples * num channels * bytes per sample)
              * 44+   audio data
              */
-            headers.SpliceString("data", 36);
-            headers.SpliceNum(data.Subchunk2Size, 40, 4);
+            headers.SpliceString("data", WavData.SUBCHUNK_2_ID);
+            headers.SpliceNum(data.Subchunk2Size, WavData.SUBCHUNK_2_SIZE);
 
             return headers;
         }
@@ -161,12 +177,12 @@ namespace Backend.FileHandling
         public static bool Save(string filePath, Song song)
         {
             //make a byte array of sufficient length
-            byte[] data = new byte[song.Data.NumSamples * song.Data.BytesPerSample + AUDIO_LOCATION + 1];
+            byte[] data = new byte[song.Data.NumSamples * song.Data.BytesPerSample + DATA_LOCATION + 1];
 
             //write headers to first 44 bytes
-            Array.Copy(GenerateHeaders(song.Data), 0, data, 0, AUDIO_LOCATION + 1);
+            Array.Copy(GenerateHeaders(song.Data), 0, data, 0, DATA_LOCATION + 1);
             //fill remaining data with audio bytes
-            Array.Copy(GenerateAudioBytes(song), 0, data, AUDIO_LOCATION + 1, song.Data.NumSamples * song.Data.BytesPerSample);
+            Array.Copy(GenerateAudioBytes(song), 0, data, DATA_LOCATION + 1, song.Data.NumSamples * song.Data.BytesPerSample);
 
             //write data
             return WriteRaw(filePath, data);

@@ -134,8 +134,9 @@ namespace Backend.FileHandling
             //generate a byte array with sufficient size for all data (num samples * bytes per sample)
             byte[] output = new byte[song.Data.NumSamples * song.Data.BytesPerSample];
 
-            //for each (sample, index) in the sound - standard index (0, 1, 2, etc.)
-            foreach (var (sample, index) in song.Sound.Select((x, i) => (x, i)))
+            //for each sample in the sound
+            int index = 0;
+            foreach (var sample in song.Sound)
             {
                 //multiply the double by 2^(bits per sample - 1) to move back to storage types
                 long num = (long)(sample * (1 << (song.Data.BitsPerSample - 1)));
@@ -146,7 +147,7 @@ namespace Backend.FileHandling
                     num += 1 << song.Data.BitsPerSample;
 
                 //splice the calculate number into the byte array
-                output.SpliceNum(num, index * song.Data.BytesPerSample, song.Data.BytesPerSample);
+                output.SpliceNum(num, index++ * song.Data.BytesPerSample, song.Data.BytesPerSample);
             }
 
             return output;

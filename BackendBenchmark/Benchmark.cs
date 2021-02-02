@@ -20,7 +20,7 @@ namespace BackendBenchmark
         [Benchmark(Baseline = true)]
         public void ReadSaveWav()
         {
-            Wav.Save("temp.wav", Wav.Read(@"C:/Eq/1.wav"));
+            Wav.Save("temp.wav", Wav.Read(@"C:/Eq/440.wav"));
         }
     }
 }

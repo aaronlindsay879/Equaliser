@@ -13,8 +13,13 @@ namespace Backend.Algorithms
             DecomposedSongSegment output = new DecomposedSongSegment(maxFreq) { SamplingRate = song.SamplingRate };
 
             //for every frequency we can calculate
-            for (int freq = 0; freq < maxFreq; freq += song.SamplingRate / song.Sound.Length)
+            for (int freq = 0; freq < maxFreq; freq += 1)
             {
+                //if not integer index, skip
+                decimal index = freq == 0 ? 0 : freq / ((decimal)song.Sound.Length / song.Data.SampleRate);
+                if ((index % 1) != 0)
+                    continue;
+
                 Complex tempOutput = new Complex();
                 
                 //calculate the raw output at a given frequency using the standard formula for discrete fourier transform
@@ -25,8 +30,7 @@ namespace Backend.Algorithms
                 }
 
                 //convert raw output to useful value
-                int index = freq == 0 ? 0 : freq / (song.SamplingRate / song.Sound.Length);
-                output.Audio[index] = Math.Round(2 * tempOutput.Magnitude / song.Sound.Length, 5);
+                output.Audio[(int)index] = Math.Round(2 * tempOutput.Magnitude / song.Sound.Length, 5);
             }
 
             return output;
